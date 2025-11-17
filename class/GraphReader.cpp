@@ -4,28 +4,25 @@
 #include <iostream>
 #include <stdexcept>
 
-// Dùng lại Point::getID() đã có
-#define GET_ID(p) p.getID() 
-
 // ===================================================
 // TRIỂN KHAI MATRIX READER
 // ===================================================
 
-// Định dạng giả định: Dòng 1: ID điểm khởi đầu (Y), Dòng 2: Số lượng đỉnh (N). N dòng tiếp theo là ma trận N x N.
-GraphReadResult MatrixReader::readGraph(const std::string& filename) {
+// Định dạng file: Dòng 1: Số lượng đỉnh (N). N dòng tiếp theo là ma trận N x N.
+Graph MatrixReader::readGraph(const std::string& filename) {
     std::ifstream file(filename);
     Graph g;
-    int startID = -1;
     int N = 0;
 
     if (!file.is_open()) {
         std::cerr << "Lỗi: MatrixReader không thể mở file " << filename << std::endl;
-        return {g, -1};
+        return g;
     }
 
-    if (!(file >> startID) || !(file >> N)) {
-        std::cerr << "Lỗi: Không đọc được ID khởi đầu hoặc số lượng đỉnh trong MatrixReader." << std::endl;
-        return {g, -1};
+    // Đọc số lượng đỉnh N
+    if (!(file >> N)) {
+        std::cerr << "Lỗi: Không đọc được số lượng đỉnh (N) trong MatrixReader." << std::endl;
+        return g;
     }
 
     // 1. Thêm tất cả các điểm (ID từ 0 đến N-1)
@@ -39,41 +36,33 @@ GraphReadResult MatrixReader::readGraph(const std::string& filename) {
             double weight;
             if (!(file >> weight)) {
                 std::cerr << "Lỗi: Định dạng ma trận không đúng (kích thước sai)." << std::endl;
-                return {g, -1};
+                return g;
             }
 
-            if (weight != 0) {
+            if (weight != 0.0) {
                 g.addEdge(Point(i), Point(j), weight);
             }
         }
     }
 
-    return {g, startID};
+    return g;
 }
 
 // ===================================================
 // TRIỂN KHAI ADJACENCY LIST READER
 // ===================================================
 
-// Định dạng giả định: Dòng 1: ID điểm khởi đầu (Y). Các dòng tiếp theo là Danh sách Kề.
-GraphReadResult AdjacencyListReader::readGraph(const std::string& filename) {
+// Định dạng file: Các dòng là Danh sách Kề (ID_nguồn ID_đích trọng_số ID_đích trọng_số...).
+Graph AdjacencyListReader::readGraph(const std::string& filename) {
     std::ifstream file(filename);
     Graph g;
     std::string line;
-    int startID = -1;
     int maxID = -1; 
 
     if (!file.is_open()) {
         std::cerr << "Lỗi: AdjacencyListReader không thể mở file " << filename << std::endl;
-        return {g, -1};
+        return g;
     }
-
-    // *** BƯỚC 1: Đọc ID điểm khởi đầu (Y) ***
-    if (!(file >> startID)) {
-        std::cerr << "Lỗi: Không đọc được ID điểm khởi đầu." << std::endl;
-        return {g, -1};
-    }
-    std::getline(file, line); // Đọc bỏ dòng còn lại (nếu có)
 
     // Lần đọc 1 (Tìm maxID và thêm điểm)
     std::streampos current_pos = file.tellg(); // Ghi lại vị trí bắt đầu dữ liệu
@@ -114,31 +103,24 @@ GraphReadResult AdjacencyListReader::readGraph(const std::string& filename) {
         }
     }
 
-    return {g, startID};
+    return g;
 }
 
 // ===================================================
 // TRIỂN KHAI EDGE LIST READER
 // ===================================================
 
-// Định dạng giả định: Dòng 1: ID điểm khởi đầu (Y). Các dòng tiếp theo là Danh sách Cạnh (src dest weight).
-GraphReadResult EdgeListReader::readGraph(const std::string& filename) {
+// Định dạng file: Các dòng là Danh sách Cạnh (ID_nguồn ID_đích trọng_số).
+Graph EdgeListReader::readGraph(const std::string& filename) {
     std::ifstream file(filename);
     Graph g;
     int srcID, destID;
     double weight;
-    int startID = -1;
     int maxID = -1; 
 
     if (!file.is_open()) {
         std::cerr << "Lỗi: EdgeListReader không thể mở file " << filename << std::endl;
-        return {g, -1};
-    }
-
-    // *** BƯỚC 1: Đọc ID điểm khởi đầu (Y) ***
-    if (!(file >> startID)) {
-        std::cerr << "Lỗi: Không đọc được ID điểm khởi đầu." << std::endl;
-        return {g, -1};
+        return g;
     }
 
     // Lần đọc 1 (Tìm maxID và thêm điểm)
@@ -163,5 +145,5 @@ GraphReadResult EdgeListReader::readGraph(const std::string& filename) {
         g.addEdge(Point(srcID), Point(destID), weight);
     }
 
-    return {g, startID};
+    return g;
 }
