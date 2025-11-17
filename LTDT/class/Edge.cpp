@@ -1,15 +1,15 @@
 #include "Edge.h"
 
 // Constructor
-Edge::Edge(const Point& src, const Point& dest, double w)
+Edge::Edge(const Vertex& src, const Vertex& dest, double w)
     : source(src), destination(dest), weight(w) {}
 
 // Getters
-Point Edge::getSource() const {
+Vertex Edge::getSource() const {
     return source;
 }
 
-Point Edge::getDestination() const {
+Vertex Edge::getDestination() const {
     return destination;
 }
 
